@@ -76,18 +76,18 @@ module RestClient
       key = parts.shift
       pdict = {}
 
-        parts.each do |p|
-          i = p.index('=')
-          if i
-            name = p[0...i].strip.downcase
-            value = p[i+1..-1].strip
-            if value.length >= 2 && value[0] == '"' && value[-1] == '"'
-              value = value[1...-1]
-              value = value.gsub('\\\\', '\\').gsub('\\"', '"')
-            end
-            pdict[name] = value
+      parts.each do |p|
+        i = p.index('=')
+        if i
+          name = p[0...i].strip.downcase
+          value = p[i+1..-1].strip
+          if value.length >= 2 && value[0] == '"' && value[-1] == '"'
+            value = value[1...-1]
+            value = value.gsub('\\\\', '\\').gsub('\\"', '"')
           end
+          pdict[name] = value
         end
+      end
 
       [key, pdict]
     end
