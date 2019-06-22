@@ -38,7 +38,7 @@ module RestClient
     # @private
     #
     def self._cgi_parseparam(s)
-      return enum_for(__method__, s) unless block_given?
+      parts = []
 
       while s[0] == ';'
         s = s[1..-1]
@@ -52,10 +52,11 @@ module RestClient
           ends = s.length
         end
         f = s[0...ends]
-        yield f.strip
+        parts.push f.strip
         s = s[ends..-1]
       end
-      nil
+
+      parts
     end
 
     # Parse a Content-Type like header.
@@ -72,11 +73,10 @@ module RestClient
     #
     def self.cgi_parse_header(line)
       parts = _cgi_parseparam(';' + line)
-      key = parts.next
+      key = parts.shift
       pdict = {}
 
-      begin
-        while (p = parts.next)
+        parts.each do |p|
           i = p.index('=')
           if i
             name = p[0...i].strip.downcase
@@ -88,8 +88,6 @@ module RestClient
             pdict[name] = value
           end
         end
-      rescue StopIteration
-      end
 
       [key, pdict]
     end
