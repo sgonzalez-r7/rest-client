@@ -73,7 +73,7 @@ module RestClient
     # @todo remove this method when dropping support for Ruby 2.0
     #
     def self._cgi_parseparam(s)
-      return enum_for(__method__, s) unless block_given?
+      parts = []
 
       while s[0] == ';'
         s = s[1..-1]
@@ -87,10 +87,11 @@ module RestClient
           ends = s.length
         end
         f = s[0...ends]
-        yield f.strip
+        parts.push f.strip
         s = s[ends..-1]
       end
-      nil
+
+      parts
     end
 
     # Parse a Content-Type like header.
@@ -111,23 +112,20 @@ module RestClient
     #
     def self.deprecated_cgi_parse_header(line)
       parts = _cgi_parseparam(';' + line)
-      key = parts.next
+      key = parts.shift
       pdict = {}
 
-      begin
-        while (p = parts.next)
-          i = p.index('=')
-          if i
-            name = p[0...i].strip.downcase
-            value = p[i+1..-1].strip
-            if value.length >= 2 && value[0] == '"' && value[-1] == '"'
-              value = value[1...-1]
-              value = value.gsub('\\\\', '\\').gsub('\\"', '"')
-            end
-            pdict[name] = value
+      parts.each do |p|
+        i = p.index('=')
+        if i
+          name = p[0...i].strip.downcase
+          value = p[i+1..-1].strip
+          if value.length >= 2 && value[0] == '"' && value[-1] == '"'
+            value = value[1...-1]
+            value = value.gsub('\\\\', '\\').gsub('\\"', '"')
           end
+          pdict[name] = value
         end
-      rescue StopIteration
       end
 
       [key, pdict]
